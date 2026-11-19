@@ -11,4 +11,4 @@ Lab use only: synthetic data, no intrusive agent, no automatic response.
 Python, Flask, SQLite, HTML. Export in CSV.
 
 ## Author
-[ Yessin Frikha ]
+Yessin Frikha 
