@@ -8,7 +8,7 @@ Lab use only: synthetic data, no intrusive agent, no automatic response.
 - Week 1 (planning): done. See the `docs` folder.
 
 ## Stack
-Python, Flask, SQLite, HTML. Export in CSV.
+Python, Streamlit, SQLite, HTML. Export in CSV.
 
 ## Author
 Yessin Frikha 
