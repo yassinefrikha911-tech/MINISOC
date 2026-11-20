@@ -11,6 +11,6 @@ Date: 18 November 2026
 | 3 | Export | CSV, UTF-8, comma-separated | Because Excel opens accented characters correctly with the utf-8-sig variant. |
 | 3 | CSV columns | timestamp_utc, source, ip, type, severity, status_code, summary | These are the main normalized fields an analyst needs. |
 | 3 | CSV safety | Prefix risky text cells (= + - @) with a single quote | Usernames and URLs in logs come from outsiders and could contain formulas. |
-
+| 2 | SSH year | Given at import, otherwise guessed | SSH lines have no year. The analyst can give one, which keeps demos reproducible. Otherwise the parser uses the current year, or last year if the date would be in the future. |
 ## Decided in Week 1
 - Event schema, date handling, severity criteria, and missing-data behaviour: see `schema.md`.

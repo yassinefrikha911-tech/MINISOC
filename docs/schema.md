@@ -18,9 +18,7 @@
 - ssh_auth_failure, ssh_auth_success, ssh_invalid_user, http_request
 
 ## Date rules
-- Stored in UTC. The interface shows the timezone.
-- SSH lines have no year: assume 2026 and UTC. Documented limit.
-- HTTP lines include an offset: convert it to UTC.
+ SSH lines have no year: the analyst can give the year at import. If not, it is guessed (current year, or last year if that date would be in the future). The year used is saved with the import. A log that spans New Year is a documented limit.
 
 ## Severity rules (event level, written criteria)
 - ssh_auth_success: info
