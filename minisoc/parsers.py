@@ -89,3 +89,55 @@ def parse_ssh_line(line, filename, year=None, now=None):
         "summary": summary,
         "raw": line,
     }
+
+# Shape of a whole HTTP line (Apache/Nginx Combined Log Format)
+HTTP_LINE = re.compile(
+    r'^(?P<ip>\S+)\s+\S+\s+\S+\s+\[(?P<time>[^\]]+)\]\s+'
+    r'"(?P<method>[A-Z]+)\s+(?P<path>\S+)\s+(?P<protocol>[^"]*)"\s+'
+    r'(?P<status>\d{3})\s+(?P<size>\S+)'
+)
+
+
+def parse_http_line(line, filename):
+    """Turn one HTTP access-log line into an event dictionary, or raise ParseError."""
+    line = line.strip()
+
+    match = HTTP_LINE.match(line)
+    if not match:
+        raise ParseError("line not recognized as a supported HTTP line")
+
+    # Date: the line has an offset (+0100, +0000...), convert it to UTC
+    try:
+        moment = datetime.strptime(match["time"], "%d/%b/%Y:%H:%M:%S %z")
+    except ValueError:
+        raise ParseError("unreadable timestamp")
+    timestamp = moment.astimezone(timezone.utc).isoformat()
+
+    # IP: must be a valid address
+    try:
+        ip = str(ipaddress.ip_address(match["ip"]))
+    except ValueError:
+        raise ParseError("invalid IP address")
+
+    # Severity from the status code (rules from schema.md)
+    status = int(match["status"])
+    if 200 <= status < 400:
+        severity = "info"
+    elif 400 <= status < 500:
+        severity = "low"
+    elif 500 <= status < 600:
+        severity = "medium"
+    else:
+        severity = "unknown"
+
+    return {
+        "timestamp": timestamp,
+        "source": "http",
+        "file": filename,
+        "ip": ip,
+        "type": "http_request",
+        "severity": severity,
+        "status_code": status,
+        "summary": f"{match['method']} {match['path']} returned {status}",
+        "raw": line,
+    }
