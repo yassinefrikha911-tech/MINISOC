@@ -3,3 +3,4 @@ __pycache__/
 .venv/
 venv/
 *.db
+data/apache_logs.log
