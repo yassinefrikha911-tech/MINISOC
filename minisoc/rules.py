@@ -1,4 +1,4 @@
-from collections import defaultdict
+from collections import Counter, defaultdict
 from datetime import datetime, timedelta, timezone
 
 # Pedagogical values, calibrated on the demo logs (see docs/rules.md)
@@ -62,11 +62,11 @@ def build_alert(rule, title, events, ip, source, window_minutes, threshold, deta
     }
 
 
-def rule_r1(events, window_minutes=5, threshold=5):
-    """R1: at least `threshold` SSH failures from one IP within `window_minutes`."""
+def _per_ip_rule(events, keep, rule, title, source, window_minutes, threshold, describe):
+    """Shared engine: group matching events by IP, then look for bursts."""
     by_ip = defaultdict(list)
     for e in events:
-        if e["source"] == "ssh" and e["type"] in R1_TYPES and e["ip"]:
+        if e["source"] == source and e["ip"] and keep(e):
             by_ip[e["ip"]].append(e)
 
     window = timedelta(minutes=window_minutes)
@@ -76,12 +76,53 @@ def rule_r1(events, window_minutes=5, threshold=5):
         times = [_time(e) for e in group]
         for first, last in find_bursts(times, window, threshold):
             burst = group[first:last + 1]
-            details = (
-                f"{len(burst)} failed SSH logins from {ip} within "
-                f"{window_minutes} minutes (threshold {threshold})"
-            )
             alerts.append(build_alert(
-                "R1", "Repeated SSH failures", burst, ip, "ssh",
-                window_minutes, threshold, details,
+                rule, title, burst, ip, source,
+                window_minutes, threshold, describe(burst, ip),
             ))
     return alerts
+
+
+def rule_r1(events, window_minutes=5, threshold=5):
+    """R1: at least `threshold` SSH failures from one IP within `window_minutes`."""
+    def describe(burst, ip):
+        return (f"{len(burst)} failed SSH logins from {ip} within "
+                f"{window_minutes} minutes (threshold {threshold}).")
+
+    return _per_ip_rule(
+        events, lambda e: e["type"] in R1_TYPES,
+        "R1", "Repeated SSH failures", "ssh", window_minutes, threshold, describe,
+    )
+
+
+def rule_r2(events, window_minutes=2, threshold=5):
+    """R2: at least `threshold` HTTP 4xx/5xx responses to one IP within `window_minutes`."""
+    def describe(burst, ip):
+        codes = Counter(e["status_code"] for e in burst)
+        listed = ", ".join(f"{code} x{n}" for code, n in sorted(codes.items()))
+        return (f"{len(burst)} HTTP error responses (4xx/5xx) for requests from {ip} "
+                f"within {window_minutes} minutes (threshold {threshold}). Codes: {listed}.")
+
+    return _per_ip_rule(
+        events,
+        lambda e: e["status_code"] is not None and 400 <= e["status_code"] <= 599,
+        "R2", "Repeated HTTP errors", "http", window_minutes, threshold, describe,
+    )
+
+
+def escalate(alerts):
+    """The same IP triggering two different rules makes both alerts high."""
+    rules_by_ip = defaultdict(set)
+    for a in alerts:
+        if a["ip"]:
+            rules_by_ip[a["ip"]].add(a["rule"])
+    for a in alerts:
+        if a["ip"] and len(rules_by_ip[a["ip"]]) >= 2:
+            a["priority"] = "high"
+            a["details"] += " Also flagged by another rule for the same IP."
+    return alerts
+
+
+def run_rules(events):
+    """Run every rule, then rank the alerts. R3 is added here later."""
+    return escalate(rule_r1(events) + rule_r2(events))
