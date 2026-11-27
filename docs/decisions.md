@@ -13,5 +13,6 @@ Date: 18 November 2026
 | 3 | CSV safety | Prefix risky text cells (= + - @) with a single quote | Usernames and URLs in logs come from outsiders and could contain formulas. |
 | 2 | SSH year | Given at import, otherwise guessed | SSH lines have no year. The analyst can give one, which keeps demos reproducible. Otherwise the parser uses the current year, or last year if the date would be in the future. |
 | 4 | Duplicate imports | Identical file (same SHA-256 and source) is refused with a message | Nothing is overwritten or deleted silently. A modified file counts as a new import, so events present in both versions are stored twice (documented limit). |
+| 5 | Re-running the rules | An alert already stored (same rule, IP, first and last time) is not duplicated. Its priority can only go up, and the report says so. Nothing is deleted. | The history is never overwritten silently. Limit: if new events extend a burst, the longer burst is stored as a new alert next to the old one. |
 ## Decided in Week 1
 - Event schema, date handling, severity criteria, and missing-data behaviour: see `schema.md`.
