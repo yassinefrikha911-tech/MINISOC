@@ -7,7 +7,7 @@ Lab use only: synthetic data, no intrusive agent, no remote access, no automatic
 ## Status
 - Week 1 (planning): done. See `docs/`.
 - Week 2 (ingestion and SQLite): done. Parsers, importer with import report, database.
--  Week 3 (rules and dashboard): rules R1 to R3, alerts in SQLite, dashboard with filters and CSV export done. Dedicated scenarios and final polish to do.
+- Week 3 (rules and dashboard): done. Three rules, one scenario each, alerts in SQLite, dashboard with filters and CSV export.
 
 ## Prerequisites
 - Python 3.11 or higher

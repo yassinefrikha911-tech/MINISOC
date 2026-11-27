@@ -1,0 +1,13 @@
+Nov 19 08:00:12 server sshd[4101]: Accepted password for alice from 198.51.100.7 port 41001 ssh2
+Nov 19 08:30:01 server sshd[4110]: Failed password for bob from 192.0.2.20 port 50011 ssh2
+Nov 19 08:30:20 server sshd[4111]: Failed password for bob from 192.0.2.20 port 50012 ssh2
+Nov 19 08:30:45 server sshd[4112]: Failed password for bob from 192.0.2.20 port 50013 ssh2
+Nov 19 08:31:10 server sshd[4113]: Failed password for bob from 192.0.2.20 port 50014 ssh2
+Nov 19 08:31:30 server sshd[4114]: Accepted password for bob from 192.0.2.20 port 50015 ssh2
+Nov 19 09:15:02 server sshd[4201]: Failed password for invalid user admin from 192.0.2.10 port 52001 ssh2
+Nov 19 09:15:12 server sshd[4202]: Failed password for root from 192.0.2.10 port 52002 ssh2
+Nov 19 09:15:22 server sshd[4203]: Failed password for invalid user test from 192.0.2.10 port 52003 ssh2
+Nov 19 09:15:32 server sshd[4204]: Invalid user oracle from 192.0.2.10 port 52004
+Nov 19 09:15:42 server sshd[4205]: Failed password for root from 192.0.2.10 port 52005 ssh2
+Nov 19 09:15:52 server sshd[4206]: Failed password for root from 192.0.2.10 port 52006 ssh2
+Nov 19 10:00:00 server sshd[4300]: Accepted password for alice from 198.51.100.7 port 41050 ssh2
