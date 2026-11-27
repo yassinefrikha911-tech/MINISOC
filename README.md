@@ -7,7 +7,7 @@ Lab use only: synthetic data, no intrusive agent, no remote access, no automatic
 ## Status
 - Week 1 (planning): done. See `docs/`.
 - Week 2 (ingestion and SQLite): done. Parsers, importer with import report, database.
-- Week 3 (rules and dashboard): to do.
+-  Week 3 (rules and dashboard): rules R1 to R3, alerts in SQLite, dashboard with filters and CSV export done. Dedicated scenarios and final polish to do.
 
 ## Prerequisites
 - Python 3.11 or higher
@@ -23,14 +23,13 @@ pip install -r requirements.txt
 ```
 On Linux: use `python3 -m venv .venv`, then `source .venv/bin/activate`.
 
-## Run the demo
+## Run the dashboard
 ```
-python init_db.py
-python run_import.py ssh data/demo_v1_ssh.log 2026
-python run_import.py http data/demo_v1_http.log
-python show_db.py
+streamlit run app.py
 ```
-Expected: 14 and 15 accepted lines, then 29 events listed (SSH and HTTP together, in time order).
+Then open http://localhost:8501. In the Import tab, import `data/demo_v1_ssh.log` (SSH, year 2026) and `data/demo_v1_http.log` (HTTP). Two alerts appear (R1 and R2, high). Import `data/demo_r3_http.log` for the third (R3). Stop with Ctrl+C.
+
+Command line alternative: `python run_import.py ssh data/demo_v1_ssh.log 2026`, then `python run_import.py http data/demo_v1_http.log`, then `python run_detection.py` and `python show_alerts.py`.
 
 ## How importing works
 - `python run_import.py <ssh|http> <file> [year]`
