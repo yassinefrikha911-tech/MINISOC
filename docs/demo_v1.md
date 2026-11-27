@@ -13,4 +13,4 @@ Synthetic logs for the lab. IPs come from reserved example ranges. SSH is import
 ## Planned for the rules (Week 3, thresholds to calibrate)
 - R1: the SSH burst should trigger; the isolated failures (alice, bob) should not.
 - R2: the HTTP error burst should trigger; the single 404 should not.
-- R3: no volume spike yet. It is added in the Week 4 scenarios.
+- R3: no alert on this set. A dedicated R3 scenario is in data/demo_r3_http.log.

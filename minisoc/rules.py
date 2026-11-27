@@ -123,6 +123,53 @@ def escalate(alerts):
     return alerts
 
 
+def rule_r3(events, threshold=30):
+    """R3: at least `threshold` HTTP requests in one calendar minute (all IPs)."""
+    per_minute = defaultdict(list)
+    for e in events:
+        if e["source"] == "http":
+            per_minute[_time(e).replace(second=0, microsecond=0)].append(e)
+
+    # Fixed window: each calendar minute is counted on its own
+    hot = sorted(m for m, group in per_minute.items() if len(group) >= threshold)
+
+    # Consecutive hot minutes belong to the same spike
+    spikes = []
+    for minute in hot:
+        if spikes and minute - spikes[-1][-1] == timedelta(minutes=1):
+            spikes[-1].append(minute)
+        else:
+            spikes.append([minute])
+
+    alerts = []
+    for minutes in spikes:
+        group = sorted(
+            (e for m in minutes for e in per_minute[m]),
+            key=lambda e: (_time(e), e["id"]),
+        )
+        peak_minute = max(minutes, key=lambda m: len(per_minute[m]))
+        peak = len(per_minute[peak_minute])
+
+        top = ""
+        ips = Counter(e["ip"] for e in group if e["ip"])
+        if ips:
+            top_ip, top_n = ips.most_common(1)[0]
+            top = f" Top source: {top_ip} ({top_n} requests)."
+
+        details = (
+            f"Peak of {peak} HTTP requests in one minute "
+            f"({peak_minute.strftime('%H:%M')} UTC), threshold {threshold} per minute. "
+            f"Spike lasted {len(minutes)} minute(s).{top}"
+        )
+        alert = build_alert(
+            "R3", "Request volume spike", group, None, "http", 1, threshold, details
+        )
+        # Priority from the busiest minute, not from the total of the merged minutes
+        alert["priority"] = "high" if peak >= 2 * threshold else "medium"
+        alerts.append(alert)
+    return alerts
+
+
 def run_rules(events):
-    """Run every rule, then rank the alerts. R3 is added here later."""
-    return escalate(rule_r1(events) + rule_r2(events))
+    """Run every rule, then rank the alerts."""
+    return escalate(rule_r1(events) + rule_r2(events) + rule_r3(events))
